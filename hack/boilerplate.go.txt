@@ -1,5 +1,4 @@
 /*
-Copyright 2019 The Jetstack cert-manager contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,12 +12,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-// +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/jetstack/cert-manager/pkg/apis/adcs
-// +k8s:openapi-gen=true
-// +k8s:defaulter-gen=TypeMeta
-
-// Package v1alpha2 is the v1alpha2 version of the API.
-// +groupName=adcs.cert-manager.io
-package v1alpha1

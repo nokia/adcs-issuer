@@ -1,0 +1,7 @@
+version: "2"
+domain: certmanager.csf.nokia.com
+repo: github.com/chojnack/adcs-issuer
+resources:
+- group: adcs
+  version: v1
+  kind: AdcsRequest
