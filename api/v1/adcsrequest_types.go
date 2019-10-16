@@ -34,8 +34,8 @@ type AdcsRequestSpec struct {
 	// This field must be set on the request.
 	CSR []byte `json:"csr"`
 
-	// IssuerRef references a properly configured ADCS-type Issuer which should
-	// be used to serve this ADCSRequest.
+	// IssuerRef references a properly configured AdcsIssuer which should
+	// be used to serve this AdcsRequest.
 	// If the Issuer does not exist, processing will be retried.
 	// If the Issuer is not an 'ADCS' Issuer, an error will be returned and the
 	// ADCSRequest will be marked as failed.
@@ -91,6 +91,7 @@ const (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // AdcsRequest is the Schema for the adcsrequests API
 type AdcsRequest struct {

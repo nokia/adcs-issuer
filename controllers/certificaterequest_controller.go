@@ -22,8 +22,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	api "github.com/chojnack/adcs-issuer/api/v1"
 	cmapi "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
-	//cmv1alpha2  "github.com/chojnack/adcs-issuer/api/v1"
 )
 
 // AdcsRequestReconciler reconciles a AdcsRequest object
@@ -36,10 +36,33 @@ type CertificateRequestReconciler struct {
 // +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=adcsrequests/status,verbs=get;update;patch
 
 func (r *CertificateRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
-	_ = r.Log.WithValues("certificaterequest", req.NamespacedName)
+	ctx := context.Background()
+	log := r.Log.WithValues("certificaterequest", req.NamespacedName)
 
 	// your logic here
+
+	// Fetch the CertificateRequest resource being reconciled
+	cr := new(cmapi.CertificateRequest)
+	if err := r.Client.Get(ctx, req.NamespacedName, cr); err != nil {
+		log.Error(err, "failed to retrieve CertificateRequest resource")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// Check the CertificateRequest's issuerRef and if it does not match the api
+	// group name, log a message at a debug level and stop processing.
+	if cr.Spec.IssuerRef.Group != "" && cr.Spec.IssuerRef.Group != api.GroupVersion.Group {
+		log.V(4).Info("resource does not specify an issuerRef group name that we are responsible for", "group", cr.Spec.IssuerRef.Group)
+		return ctrl.Result{}, nil
+	}
+
+	// If the certificate data is already set then we skip this request as it
+	// has already been completed in the past.
+	if len(cr.Status.Certificate) > 0 {
+		log.V(4).Info("existing certificate data found in status, skipping already completed CertificateRequest")
+		return ctrl.Result{}, nil
+	}
+
+	log.Info("Processing to be implamented...")
 
 	return ctrl.Result{}, nil
 }

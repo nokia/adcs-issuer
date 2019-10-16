@@ -1,0 +1,7 @@
+apiVersion: adcs.certmanager.csf.nokia.com/v1
+kind: AdcsIssuer
+metadata:
+  name: adcsissuer-sample
+spec:
+  # Add fields here
+  foo: bar

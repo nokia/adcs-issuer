@@ -5,3 +5,6 @@ resources:
 - group: adcs
   version: v1
   kind: AdcsRequest
+- group: adcs
+  version: v1
+  kind: AdcsIssuer

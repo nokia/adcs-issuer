@@ -18,5 +18,5 @@ require (
 	github.com/onsi/gomega v1.7.0
 	k8s.io/apimachinery v0.0.0-20190913080033-27d36303b655
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
-	sigs.k8s.io/controller-runtime v0.2.0-beta.4
+	sigs.k8s.io/controller-runtime v0.3.0
 )
