@@ -35,10 +35,20 @@ type AdcsIssuerReconciler struct {
 // +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=adcsissuers/status,verbs=get;update;patch
 
 func (r *AdcsIssuerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+	ctx := context.Background()
 	_ = r.Log.WithValues("adcsissuer", req.NamespacedName)
 
 	// your logic here
+
+	// Fetch the AdcsIssuer resource being reconciled
+	issuer := new(adcsv1.AdcsIssuer)
+	if err := r.Client.Get(ctx, req.NamespacedName, issuer); err != nil {
+		// We don't log error here as this is probably the 'NotFound'
+		// case for deleted object. The AdcsRequest will be automatically deleted for cascading delete.
+		//
+		// The Manager will log other errors.
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
 	return ctrl.Result{}, nil
 }

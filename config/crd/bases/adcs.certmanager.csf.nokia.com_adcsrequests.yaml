@@ -35,7 +35,7 @@ spec:
           description: AdcsRequestSpec defines the desired state of AdcsRequest
           properties:
             csr:
-              description: Certificate signing request bytes in DER encoding. This
+              description: Certificate signing request bytes in PEM encoding. This
                 will be used when finalizing the request. This field must be set on
                 the request.
               format: byte
@@ -70,7 +70,7 @@ spec:
               type: string
             reason:
               description: Reason optionally provides more information about a why
-                the order is in the current state.
+                the AdcsRequest is in the current state.
               type: string
             state:
               description: State contains the current state of this ADCSRequest resource.

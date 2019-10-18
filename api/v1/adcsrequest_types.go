@@ -29,10 +29,10 @@ type AdcsRequestSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Certificate signing request bytes in DER encoding.
+	// Certificate signing request bytes in PEM encoding.
 	// This will be used when finalizing the request.
 	// This field must be set on the request.
-	CSR []byte `json:"csr"`
+	CSRPEM []byte `json:"csr"`
 
 	// IssuerRef references a properly configured AdcsIssuer which should
 	// be used to serve this AdcsRequest.
@@ -59,7 +59,7 @@ type AdcsRequestStatus struct {
 	// +optional
 	State State `json:"state,omitempty"`
 
-	// Reason optionally provides more information about a why the order is in
+	// Reason optionally provides more information about a why the AdcsRequest is in
 	// the current state.
 	// +optional
 	Reason string `json:"reason,omitempty"`

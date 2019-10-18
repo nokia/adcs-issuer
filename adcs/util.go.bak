@@ -1,0 +1,25 @@
+package adcs
+
+import (
+	v1alpha1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+)
+
+// IsFinalState will return true if the given ADCS State is a 'final' state.
+
+func IsFinalState(s v1alpha1.State) bool {
+	switch s {
+	case v1alpha1.Valid, v1alpha1.Invalid, v1alpha1.Expired, v1alpha1.Errored:
+		return true
+	}
+	return false
+}
+
+// IsFinalState will return true if the given ADCS State is a 'failure' state.
+
+func IsFailureState(s v1alpha1.State) bool {
+	switch s {
+	case v1alpha1.Invalid, v1alpha1.Expired, v1alpha1.Errored:
+		return true
+	}
+	return false
+}
