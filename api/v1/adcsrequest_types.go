@@ -95,7 +95,7 @@ const (
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".spec.status.State"
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
 
 // AdcsRequest is the Schema for the adcsrequests API
 type AdcsRequest struct {
