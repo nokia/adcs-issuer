@@ -44,8 +44,9 @@ var (
 	certificateRequestGvk = cmapi.SchemeGroupVersion.WithKind("CertificateRequest")
 )
 
-// +kubebuilder:rbac:groups=cert-manager.io,resources=certificaterequests,verbs=get;list;watch;update
+// +kubebuilder:rbac:groups=cert-manager.io,resources=certificaterequests,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificaterequests/status,verbs=get;update;patch
+
 func (r *CertificateRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithValues("certificaterequest", req.NamespacedName)

@@ -7,6 +7,14 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - adcs.certmanager.csf.nokia.com
   resources:
   - adcsissuers
@@ -42,6 +50,24 @@ rules:
   - adcs.certmanager.csf.nokia.com
   resources:
   - adcsrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificaterequests
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificaterequests/status
   verbs:
   - get
   - patch

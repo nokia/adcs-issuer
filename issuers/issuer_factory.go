@@ -107,6 +107,8 @@ func (f *IssuerFactory) getClusterAdcsIssuer(ctx context.Context, key client.Obj
 	return nil, nil
 }
 
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
+
 func (f *IssuerFactory) getUserPassword(ctx context.Context, iss *api.AdcsIssuer) (string, string, error) {
 	secret := new(corev1.Secret)
 	if err := f.Client.Get(ctx, client.ObjectKey{Namespace: iss.Namespace, Name: iss.Spec.CredentialsRef.Name}, secret); err != nil {
