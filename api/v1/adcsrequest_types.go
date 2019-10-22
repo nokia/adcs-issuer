@@ -55,7 +55,7 @@ type AdcsRequestStatus struct {
 	Id string `json:"id,omitempty"`
 
 	// State contains the current state of this ADCSRequest resource.
-	// States 'success' and 'expired' are 'final'
+	// States 'ready' and 'rejected' are 'final'
 	// +optional
 	State State `json:"state,omitempty"`
 
@@ -68,7 +68,7 @@ type AdcsRequestStatus struct {
 // State represents the state of an ADCSRequest.
 // Clients utilising this type must also gracefully handle unknown
 // values, as the contents of this enumeration may be added to over time.
-// +kubebuilder:validation:Enum=valid;ready;pending;processing;invalid;expired;errored
+// +kubebuilder:validation:Enum=pending;ready;errored;rejected
 type State string
 
 const (
@@ -95,6 +95,7 @@ const (
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".spec.status.State"
 
 // AdcsRequest is the Schema for the adcsrequests API
 type AdcsRequest struct {

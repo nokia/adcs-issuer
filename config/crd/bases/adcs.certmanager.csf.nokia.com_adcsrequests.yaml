@@ -6,6 +6,10 @@ metadata:
   creationTimestamp: null
   name: adcsrequests.adcs.certmanager.csf.nokia.com
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.status.State
+    name: State
+    type: string
   group: adcs.certmanager.csf.nokia.com
   names:
     kind: AdcsRequest
@@ -74,15 +78,12 @@ spec:
               type: string
             state:
               description: State contains the current state of this ADCSRequest resource.
-                States 'success' and 'expired' are 'final'
+                States 'ready' and 'rejected' are 'final'
               enum:
-              - valid
-              - ready
               - pending
-              - processing
-              - invalid
-              - expired
+              - ready
               - errored
+              - rejected
               type: string
           type: object
       type: object

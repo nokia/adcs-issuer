@@ -89,7 +89,11 @@ func (r *AdcsRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		cr.Status.Certificate = cert
 		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionTrue, cmapi.CertificateRequestReasonIssued, "ADCS request successfull")
 	case api.Rejected:
-		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionFalse, cmapi.CertificateRequestReasonFailed, "ADCS request rejected")
+		// This is a little hack for strange cert-manager behavior in case of failed request. Cert-manager automatically
+		// re-tries such requests (re-created CertificateRequest object) what doesn't make sense in case of rejection.
+		// We keep the Reason 'Pending' to prevent from re-trying while the actual status is in the Status Condition's Message field.
+		// TODO: change it when cert-manager handles this better.
+		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionFalse, cmapi.CertificateRequestReasonPending, "ADCS request rejected")
 	case api.Errored:
 		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionFalse, cmapi.CertificateRequestReasonFailed, "ADCS request errored")
 	}
