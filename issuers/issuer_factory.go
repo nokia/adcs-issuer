@@ -2,21 +2,29 @@ package issuers
 
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-
-	//apimachtypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 
-	adcsv1 "github.com/chojnack/adcs-issuer/api/v1"
+	"github.com/chojnack/adcs-issuer/adcs"
+	api "github.com/chojnack/adcs-issuer/api/v1"
+)
+
+const (
+	defaultStatusCheckInterval = "6h"
+	defaultRetryInterval       = "1h"
 )
 
 type IssuerFactory struct {
 	client.Client
+	Log logr.Logger
 }
 
 func (f *IssuerFactory) GetIssuer(ctx context.Context, ref cmmeta.ObjectReference, namespace string) (*Issuer, error) {
@@ -33,22 +41,64 @@ func (f *IssuerFactory) GetIssuer(ctx context.Context, ref cmmeta.ObjectReferenc
 
 // Get AdcsIssuer object from K8s
 func (f *IssuerFactory) getAdcsIssuer(ctx context.Context, key client.ObjectKey) (*Issuer, error) {
-	iss := new(adcsv1.AdcsIssuer)
-	if err := f.Client.Get(ctx, key, iss); err != nil {
+	log := f.Log.WithValues("issuer", key)
+
+	issuer := new(api.AdcsIssuer)
+	if err := f.Client.Get(ctx, key, issuer); err != nil {
 		return nil, err
 	}
 	// TODO: add checking issuer status
 
-	username, password, err := f.getUserPassword(ctx, iss)
+	username, password, err := f.getUserPassword(ctx, issuer)
 	if err != nil {
 		return nil, err
 	}
+
+	certs := issuer.Spec.CABundle
+	if len(certs) == 0 {
+		return nil, fmt.Errorf("CA Bundle required")
+	}
+
+	caCertPool := x509.NewCertPool()
+	ok := caCertPool.AppendCertsFromPEM(certs)
+	if ok == false {
+		return nil, fmt.Errorf("error loading ADCS CA bundle")
+	}
+
+	certServ, err := adcs.NewNtlmCertsrv(issuer.Spec.URL, username, password, caCertPool, false)
+	if err != nil {
+		return nil, err
+	}
+
+	statusCheckInterval := getInterval(
+		issuer.Spec.StatusCheckInterval,
+		defaultStatusCheckInterval,
+		log.WithValues("interval", "statusCheckInterval"))
+	retryInterval := getInterval(
+		issuer.Spec.RetryInterval,
+		defaultRetryInterval,
+		log.WithValues("interval", "retryInterval"))
 	return &Issuer{
 		f.Client,
-		username,
-		password,
-		iss.Spec.URL,
+		certServ,
+		retryInterval,
+		statusCheckInterval,
 	}, nil
+}
+
+func getInterval(specValue string, def string, log logr.Logger) time.Duration {
+	interval, _ := time.ParseDuration(def)
+	if specValue != "" {
+		i, err := time.ParseDuration(specValue)
+		if err != nil {
+			log.Error(err, "Cannot parse interval. Using default.")
+		} else {
+			interval = i
+		}
+	} else {
+		log.Info("Using default")
+	}
+	return interval
 }
 
 // Get ClusterAdcsIssuer object from K8s
@@ -57,7 +107,7 @@ func (f *IssuerFactory) getClusterAdcsIssuer(ctx context.Context, key client.Obj
 	return nil, nil
 }
 
-func (f *IssuerFactory) getUserPassword(ctx context.Context, iss *adcsv1.AdcsIssuer) (string, string, error) {
+func (f *IssuerFactory) getUserPassword(ctx context.Context, iss *api.AdcsIssuer) (string, string, error) {
 	secret := new(corev1.Secret)
 	if err := f.Client.Get(ctx, client.ObjectKey{Namespace: iss.Namespace, Name: iss.Spec.CredentialsRef.Name}, secret); err != nil {
 		return "", "", err

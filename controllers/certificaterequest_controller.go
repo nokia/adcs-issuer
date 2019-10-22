@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	api "github.com/chojnack/adcs-issuer/api/v1"
-	apiutil "github.com/jetstack/cert-manager/pkg/api/util"
+	cmapiutil "github.com/jetstack/cert-manager/pkg/api/util"
 	cmapi "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	core "k8s.io/api/core/v1"
@@ -53,8 +53,8 @@ func (r *CertificateRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	// your logic here
 
 	// Fetch the CertificateRequest resource being reconciled
-	cr := new(cmapi.CertificateRequest)
-	if err := r.Client.Get(ctx, req.NamespacedName, cr); err != nil {
+	cr, err := r.GetCertificateRequest(ctx, req.NamespacedName)
+	if err != nil {
 		// We don't log error here as this is probably the 'NotFound'
 		// case for deleted object. The AdcsRequest will be automatically deleted for cascading delete.
 		//
@@ -78,7 +78,7 @@ func (r *CertificateRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 
 	adcsReq := new(api.AdcsRequest)
 	// Check if AdcsRequest with the same name already exists
-	err := r.Client.Get(ctx, req.NamespacedName, adcsReq)
+	err = r.Client.Get(ctx, req.NamespacedName, adcsReq)
 	if err != nil {
 		if !apimacherrors.IsNotFound(err) {
 			log.Error(err, "failed to check for existing AdcsRequest resource")
@@ -89,7 +89,7 @@ func (r *CertificateRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	if err == nil {
 		log.Info("AdcsRequest already exists")
 		// The ADCS Request already exists. If the CSR is different we delete it and create a new one
-		if !RequestDiffers(adcsReq, cr) {
+		if !RequestDiffers(adcsReq, &cr) {
 			log.Info("No change in request")
 			return ctrl.Result{}, nil
 		}
@@ -104,11 +104,11 @@ func (r *CertificateRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	}
 
 	log.Info("Creating new AdcsRequest")
-	err = r.createAdcsRequest(ctx, cr)
+	err = r.createAdcsRequest(ctx, &cr)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	r.setStatus(ctx, cr, cmmeta.ConditionFalse, cmapi.CertificateRequestReasonPending, "Processing request")
+	r.SetStatus(ctx, &cr, cmmeta.ConditionFalse, cmapi.CertificateRequestReasonPending, "Processing ADCS request")
 	return ctrl.Result{}, nil
 }
 
@@ -147,9 +147,21 @@ func RequestDiffers(adcsReq *api.AdcsRequest, certReq *cmapi.CertificateRequest)
 	return false
 }
 
-func (r *CertificateRequestReconciler) setStatus(ctx context.Context, cr *cmapi.CertificateRequest, status cmmeta.ConditionStatus, reason, message string, args ...interface{}) error {
+func (r *CertificateRequestReconciler) GetCertificateRequest(ctx context.Context, key client.ObjectKey) (cmapi.CertificateRequest, error) {
+	cr := new(cmapi.CertificateRequest)
+	if err := r.Client.Get(ctx, key, cr); err != nil {
+		// We don't log error here as this is probably the 'NotFound'
+		// case for deleted object. The AdcsRequest will be automatically deleted for cascading delete.
+		//
+		// The Manager will log other errors.
+		return *cr, err
+	}
+	return *cr, nil
+}
+
+func (r *CertificateRequestReconciler) SetStatus(ctx context.Context, cr *cmapi.CertificateRequest, status cmmeta.ConditionStatus, reason, message string, args ...interface{}) error {
 	completeMessage := fmt.Sprintf(message, args...)
-	apiutil.SetCertificateRequestCondition(cr, cmapi.CertificateRequestConditionReady, status, reason, completeMessage)
+	cmapiutil.SetCertificateRequestCondition(cr, cmapi.CertificateRequestConditionReady, status, reason, completeMessage)
 
 	// Fire an Event to additionally inform users of the change
 	eventType := core.EventTypeNormal

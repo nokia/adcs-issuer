@@ -20,20 +20,26 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	core "k8s.io/api/core/v1"
+
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	adcsv1 "github.com/chojnack/adcs-issuer/api/v1"
+	cmapi "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
+
+	api "github.com/chojnack/adcs-issuer/api/v1"
 	"github.com/chojnack/adcs-issuer/issuers"
 )
 
 // AdcsRequestReconciler reconciles a AdcsRequest object
 type AdcsRequestReconciler struct {
 	client.Client
-	Log           logr.Logger
-	IssuerFactory issuers.IssuerFactory
-	Recorder      record.EventRecorder
+	Log                          logr.Logger
+	IssuerFactory                issuers.IssuerFactory
+	Recorder                     record.EventRecorder
+	CertificateRequestController *CertificateRequestReconciler
 }
 
 // +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=adcsrequests,verbs=get;list;watch;create;update;patch;delete
@@ -47,7 +53,7 @@ func (r *AdcsRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	log.Info("Processing request")
 
 	// Fetch the AdcsRequest resource being reconciled
-	ar := new(adcsv1.AdcsRequest)
+	ar := new(api.AdcsRequest)
 	if err := r.Client.Get(ctx, req.NamespacedName, ar); err != nil {
 		// We don't log error here as this is probably the 'NotFound'
 		// case for deleted object.
@@ -55,19 +61,57 @@ func (r *AdcsRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		// The Manager will log other errors.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	// Find the issuer
 	issuer, err := r.IssuerFactory.GetIssuer(ctx, ar.Spec.IssuerRef, ar.Namespace)
 	if err != nil {
 		log.WithValues("issuer", ar.Spec.IssuerRef).Error(err, "Couldn't get issuer")
 		return ctrl.Result{}, err
 	}
 
-	log.Info(fmt.Sprintf("Using issuer user=%s password=%s url=%s", issuer.Username, issuer.Password, issuer.Url))
+	cert, err := issuer.Issue(ctx, ar)
+	if err != nil {
+		// This is a local error.
+		// We don't change the request status and just put it back on the queue
+		// to re-try later.
+		log.Error(err, fmt.Sprintf("Failed request will be re-tried in %v", issuer.RetryInterval))
+		return ctrl.Result{Requeue: true, RequeueAfter: issuer.RetryInterval}, nil
+	}
+
+	// Get the original CertificateRequest to set result in
+	cr, err := r.CertificateRequestController.GetCertificateRequest(ctx, req.NamespacedName)
+	switch ar.Status.State {
+	case api.Pending:
+		// Check again later
+		log.Info(fmt.Sprintf("Pending request will be re-tried in %v", issuer.StatusCheckInterval))
+		r.setStatus(ctx, ar)
+		return ctrl.Result{Requeue: true, RequeueAfter: issuer.StatusCheckInterval}, nil
+	case api.Ready:
+		cr.Status.Certificate = cert
+		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionTrue, cmapi.CertificateRequestReasonIssued, "ADCS request successfull")
+	case api.Rejected:
+		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionFalse, cmapi.CertificateRequestReasonFailed, "ADCS request rejected")
+	case api.Errored:
+		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionFalse, cmapi.CertificateRequestReasonFailed, "ADCS request errored")
+	}
+	r.setStatus(ctx, ar)
 
 	return ctrl.Result{}, nil
 }
 
+func (r *AdcsRequestReconciler) setStatus(ctx context.Context, ar *api.AdcsRequest) error {
+
+	// Fire an Event to additionally inform users of the change
+	eventType := core.EventTypeNormal
+	if ar.Status.State == api.Errored || ar.Status.State == api.Rejected {
+		eventType = core.EventTypeWarning
+	}
+	r.Recorder.Event(ar, eventType, string(ar.Status.State), ar.Status.Reason)
+
+	return r.Client.Status().Update(ctx, ar)
+}
+
 func (r *AdcsRequestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&adcsv1.AdcsRequest{}).
+		For(&api.AdcsRequest{}).
 		Complete(r)
 }

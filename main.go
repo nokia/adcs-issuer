@@ -64,24 +64,27 @@ func main() {
 		os.Exit(1)
 	}
 
+	certificateRequestReconciler := &controllers.CertificateRequestReconciler{
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("CertificateRequest"),
+		Recorder: mgr.GetEventRecorderFor("adcs-certificaterequests-controller"),
+	}
+	if err = (certificateRequestReconciler).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "CertificateRequest")
+		os.Exit(1)
+	}
+
 	if err = (&controllers.AdcsRequestReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("AdcsRequest"),
 		IssuerFactory: issuers.IssuerFactory{
 			Client: mgr.GetClient(),
+			Log:    ctrl.Log.WithName("factories").WithName("AdcsIssuer"),
 		},
-		Recorder: mgr.GetEventRecorderFor("adcs-requests-controller"),
+		Recorder:                     mgr.GetEventRecorderFor("adcs-requests-controller"),
+		CertificateRequestController: certificateRequestReconciler,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "AdcsRequest")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.CertificateRequestReconciler{
-		Client:   mgr.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("CertificateRequest"),
-		Recorder: mgr.GetEventRecorderFor("adcs-certificaterequests-controller"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "CertificateRequest")
 		os.Exit(1)
 	}
 

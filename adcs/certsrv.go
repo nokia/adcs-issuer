@@ -3,10 +3,11 @@ package adcs
 type AdcsResponseStatus int
 
 const (
-	Unknown AdcsResponseStatus = 0
-	Pending AdcsResponseStatus = 1
-	Ready   AdcsResponseStatus = 2
-	Error   AdcsResponseStatus = 3
+	Unknown  AdcsResponseStatus = 0
+	Pending  AdcsResponseStatus = 1
+	Ready    AdcsResponseStatus = 2
+	Errored  AdcsResponseStatus = 3
+	Rejected AdcsResponseStatus = 4
 )
 
 type AdcsCertsrv interface {

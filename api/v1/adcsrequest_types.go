@@ -75,19 +75,22 @@ const (
 	// It is used to represent an unrecognised value.
 	Unknown State = ""
 
-	// If a request  is 'valid', the certificate has been issued by the ADCS server.
-	// This is a final state.
-	Valid State = "valid"
-
 	// If a request is marked 'Pending', is's waiting for acceptance on the ADCS.
 	// This is a transient state.
 	Pending State = "pending"
+
+	// If a request  is 'ready', the certificate has been issued by the ADCS server.
+	// This is a final state.
+	Ready State = "ready"
 
 	// Errored signifies that the ADCS request has errored for some reason.
 	// This is a catch-all state, and is used for marking internal cert-manager
 	// errors such as validation failures.
 	// This is a final state.
 	Errored State = "errored"
+
+	// The 'rejected' state is used when ADCS denied signing the request.
+	Rejected State = "rejected"
 )
 
 // +kubebuilder:object:root=true

@@ -87,6 +87,13 @@ func (s *NtlmCertsrv) verifyNtlm() (bool, error) {
 	return true, nil
 }
 
+/*
+ * Returns:
+ * - Certificate response status
+ * - Certificate (if status is Ready) or status description (if status is not Ready)
+ * - ADCS Request ID
+ * - Error
+ */
 func (s *NtlmCertsrv) GetExistingCertificate(id string) (AdcsResponseStatus, string, string, error) {
 	var certStatus AdcsResponseStatus = Unknown
 
@@ -116,16 +123,26 @@ func (s *NtlmCertsrv) GetExistingCertificate(id string) (AdcsResponseStatus, str
 			found := exp.FindStringSubmatch(bodyString)
 			if len(found) > 1 {
 				dispositionMessage = found[1]
-				exp = regexp.MustCompile(`.*Taken Under Submission*.`)
-				matchPending := exp.MatchString(bodyString)
-				if matchPending {
+				expPending := regexp.MustCompile(`.*Taken Under Submission*.`)
+				expRejected := regexp.MustCompile(`.*Denied by*.`)
+				switch true {
+				case expPending.MatchString(bodyString):
 					certStatus = Pending
-				} else {
-					certStatus = Error
+				case expRejected.MatchString(bodyString):
+					certStatus = Rejected
+				default:
+					certStatus = Errored
 				}
 
 			} else {
-				err = fmt.Errorf("Disposition message unknown: %s", found[1])
+				// If the response page is not formatted as we expect it
+				// we just log the entire page
+				disp := bodyString
+				if len(found) == 1 {
+					// Or at least the 'Disposition message' section
+					disp = found[0]
+				}
+				err = fmt.Errorf("Disposition message unknown: %s", disp)
 				klog.Errorf(err.Error())
 			}
 
@@ -157,6 +174,13 @@ func (s *NtlmCertsrv) GetExistingCertificate(id string) (AdcsResponseStatus, str
 
 }
 
+/*
+ * Returns:
+ * - Certificate response status
+ * - Certificate (if status is Ready) or status description (if status is not Ready)
+ * - ADCS Request ID (if known)
+ * - Error
+ */
 func (s *NtlmCertsrv) RequestCertificate(csr string, template string) (AdcsResponseStatus, string, string, error) {
 	var certStatus AdcsResponseStatus = Unknown
 

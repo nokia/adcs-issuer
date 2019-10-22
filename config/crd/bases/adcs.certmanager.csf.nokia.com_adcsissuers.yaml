@@ -50,11 +50,14 @@ spec:
               required:
               - name
               type: object
+            retryInterval:
+              description: How often to retry in case of communication errors (in
+                time.ParseDuration() format) Default 1 hour.
+              type: string
             statusCheckInterval:
               description: How often to check for request status in the server (in
-                minutes) Default 6 hours.
-              format: int64
-              type: integer
+                time.ParseDuration() format) Default 6 hours.
+              type: string
             url:
               description: URL is the base URL for the ADCS instance
               type: string

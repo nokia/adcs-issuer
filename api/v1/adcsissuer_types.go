@@ -40,10 +40,15 @@ type AdcsIssuerSpec struct {
 	// +optional
 	CABundle []byte `json:"caBundle,omitempty"`
 
-	// How often to check for request status in the server (in minutes)
+	// How often to check for request status in the server (in time.ParseDuration() format)
 	// Default 6 hours.
 	// +optional
-	StatusCheckInterval int64 `json:"statusCheckInterval,omitempty"`
+	StatusCheckInterval string `json:"statusCheckInterval,omitempty"`
+
+	// How often to retry in case of communication errors (in time.ParseDuration() format)
+	// Default 1 hour.
+	// +optional
+	RetryInterval string `json:"retryInterval,omitempty"`
 }
 
 // AdcsIssuerStatus defines the observed state of AdcsIssuer
