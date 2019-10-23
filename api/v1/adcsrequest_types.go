@@ -95,6 +95,7 @@ const (
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:path=adcsrequests,scope=Namespaced
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
 
 // AdcsRequest is the Schema for the adcsrequests API

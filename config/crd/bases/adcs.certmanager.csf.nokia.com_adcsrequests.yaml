@@ -7,7 +7,7 @@ metadata:
   name: adcsrequests.adcs.certmanager.csf.nokia.com
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.status.State
+  - JSONPath: .status.state
     name: State
     type: string
   group: adcs.certmanager.csf.nokia.com
@@ -16,7 +16,7 @@ spec:
     listKind: AdcsRequestList
     plural: adcsrequests
     singular: adcsrequest
-  scope: ""
+  scope: Namespaced
   subresources:
     status: {}
   validation:

@@ -95,6 +95,13 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "AdcsIssuer")
 		os.Exit(1)
 	}
+	if err = (&controllers.ClusterAdcsIssuerReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("ClusterAdcsIssuer"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ClusterAdcsIssuer")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")

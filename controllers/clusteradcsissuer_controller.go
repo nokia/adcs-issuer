@@ -25,23 +25,23 @@ import (
 	adcsv1 "github.com/chojnack/adcs-issuer/api/v1"
 )
 
-// AdcsIssuerReconciler reconciles a AdcsIssuer object
-type AdcsIssuerReconciler struct {
+// ClusterAdcsIssuerReconciler reconciles a ClusterAdcsIssuer object
+type ClusterAdcsIssuerReconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=adcsissuers,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=adcsissuers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=clusteradcsissuers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=clusteradcsissuers/status,verbs=get;update;patch
 
-func (r *AdcsIssuerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *ClusterAdcsIssuerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
-	log := r.Log.WithValues("adcsissuer", req.NamespacedName)
+	log := r.Log.WithValues("clusteradcsissuer", req.NamespacedName)
 
 	// your logic here
 
-	// Fetch the AdcsIssuer resource being reconciled
-	issuer := new(adcsv1.AdcsIssuer)
+	// Fetch the ClusterAdcsIssuer resource being reconciled
+	issuer := new(adcsv1.ClusterAdcsIssuer)
 	if err := r.Client.Get(ctx, req.NamespacedName, issuer); err != nil {
 		// We don't log error here as this is probably the 'NotFound'
 		// case for deleted object. The AdcsRequest will be automatically deleted for cascading delete.
@@ -49,13 +49,13 @@ func (r *AdcsIssuerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 		// The Manager will log other errors.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	log.Info("Registered issuer")
+	log.Info("Registered cluster issuer")
 
 	return ctrl.Result{}, nil
 }
 
-func (r *AdcsIssuerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ClusterAdcsIssuerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&adcsv1.AdcsIssuer{}).
+		For(&adcsv1.ClusterAdcsIssuer{}).
 		Complete(r)
 }

@@ -22,8 +22,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// AdcsIssuerSpec defines the desired state of AdcsIssuer
-type AdcsIssuerSpec struct {
+// ClusterAdcsIssuerSpec defines the desired state of ClusterAdcsIssuer
+type ClusterAdcsIssuerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -51,34 +51,34 @@ type AdcsIssuerSpec struct {
 	RetryInterval string `json:"retryInterval,omitempty"`
 }
 
-// AdcsIssuerStatus defines the observed state of AdcsIssuer
-type AdcsIssuerStatus struct {
+// ClusterAdcsIssuerStatus defines the observed state of ClusterAdcsIssuer
+type ClusterAdcsIssuerStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=adcsissuers,scope=Namespaced
+// +kubebuilder:resource:path=clusteradcsissuers,scope=Cluster
 // +kubebuilder:subresource:status
 
-// AdcsIssuer is the Schema for the adcsissuers API
-type AdcsIssuer struct {
+// ClusterAdcsIssuer is the Schema for the clusteradcsissuers API
+type ClusterAdcsIssuer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   AdcsIssuerSpec   `json:"spec,omitempty"`
-	Status AdcsIssuerStatus `json:"status,omitempty"`
+	Spec   ClusterAdcsIssuerSpec   `json:"spec,omitempty"`
+	Status ClusterAdcsIssuerStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// AdcsIssuerList contains a list of AdcsIssuer
-type AdcsIssuerList struct {
+// ClusterAdcsIssuerList contains a list of ClusterAdcsIssuer
+type ClusterAdcsIssuerList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []AdcsIssuer `json:"items"`
+	Items           []ClusterAdcsIssuer `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&AdcsIssuer{}, &AdcsIssuerList{})
+	SchemeBuilder.Register(&ClusterAdcsIssuer{}, &ClusterAdcsIssuerList{})
 }

@@ -55,6 +55,26 @@ rules:
   - patch
   - update
 - apiGroups:
+  - adcs.certmanager.csf.nokia.com
+  resources:
+  - clusteradcsissuers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - adcs.certmanager.csf.nokia.com
+  resources:
+  - clusteradcsissuers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - cert-manager.io
   resources:
   - certificaterequests

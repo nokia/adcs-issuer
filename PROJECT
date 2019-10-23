@@ -8,3 +8,6 @@ resources:
 - group: adcs
   version: v1
   kind: AdcsIssuer
+- group: adcs
+  version: v1
+  kind: ClusterAdcsIssuer
