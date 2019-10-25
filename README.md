@@ -150,3 +150,6 @@ More then one directive can be used at a time. e.g. to simulate rejecting the ce
 
 ## Open issues
  
+* [Full X509 Distinguished Name support](https://github.com/jetstack/cert-manager/issues/2288)
+* [Problem with automatic retry of failed requests](https://github.com/jetstack/cert-manager/issues/2289)
+
