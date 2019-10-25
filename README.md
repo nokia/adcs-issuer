@@ -14,10 +14,10 @@ It supports NTLM authentication.
 ### Requirements
 ADCS Issuer has been tested with cert-manager v.0.11.0 and currently supports CertificateRequest CRD API version v1alpha2 only.
 
-## Configuration
+## Configuration and usage
 
 ### Issuers
-The ADCS service data can configured in AdcsIssuer or ClusterAdcsIssuer CRD objects e.g.:
+The ADCS service data can configured in `AdcsIssuer` or `ClusterAdcsIssuer` CRD objects e.g.:
 ```
 kind: AdcsIssuer
 metadata:
@@ -63,11 +63,11 @@ spec:
   retryInterval: 1h
   url: <adcs-certice-url>
 ```
-The secret used by the ClusterAdcsIssuer must be defined in the namespace where controller's pod is running.
+The secret used by the `ClusterAdcsIssuer` must be defined in the namespace where controller's pod is running.
 
 ### Requesting certificates
 
-To request a certificate with AdcsIssuer the standard `certificate.cert-manager.io` object needs to be created. The `issuerRef` must be set to point to `AdcsIssuer` or `ClusterAdcsIssuer` object
+To request a certificate with `AdcsIssuer` the standard `certificate.cert-manager.io` object needs to be created. The `issuerRef` must be set to point to `AdcsIssuer` or `ClusterAdcsIssuer` object
 from group `adcs.certmanager.csf.nokie.com` e.g.:
 ```
 apiVersion: cert-manager.io/v1alpha2
@@ -92,30 +92,26 @@ spec:
 Cert-manager is responsible for creating the `Secret` with a key and `CertificateRequest` with proper CSR data.
 
 
-ADCS Issuer creates `AdcsRequest` CRD objects that keep actual state of the processing. Its name is always the same as the corresponding `CertificateRequest` object (there is strict one-to-one mapping).
+ADCS Issuer creates `AdcsRequest` CRD object that keep actual state of the processing. Its name is always the same as the corresponding `CertificateRequest` object (there is strict one-to-one mapping).
 The `AdcsRequest` object stores the ID of request assigned by the ADCS server as wall as the current status which can be one of:
 * **Pending** - the request has been sent to ADCS and is waiting for acceptance (status will be checked periodically),
 * **Ready** - the request has been successfully processed and the certificate is ready and stored in secret defined in the original `Certificate` object,
 * **Rejected** - the request was rejected by ADCS and will be re-tried unless the `Certificate` is updated,
-* **Errored**  - uncoverable problem occured.
+* **Errored**  - unrecoverable problem occured.
 
 ```
 apiVersion: adcs.certmanager.csf.nokia.com/v1
 kind: AdcsRequest
 metadata:
-  creationTimestamp: "2019-10-22T13:29:23Z"
-  generation: 1
-  name: adcs-cert-reject-3831834799
+  name: adcs-cert-3831834799
   namespace: c1
   ownerReferences:
   - apiVersion: cert-manager.io/v1alpha2
     blockOwnerDeletion: true
     controller: true
     kind: CertificateRequest
-    name: adcs-cert-reject-3831834799
+    name: adcs-cert-3831834799
     uid: f5cf630d-f4cf-11e9-95eb-fa163e038ef8
-  resourceVersion: "8236049"
-  selfLink: /apis/adcs.certmanager.csf.nokia.com/v1/namespaces/c1/adcsrequests/adcs-cert-reject-3831834799
   uid: f5d22b47-f4cf-11e9-95eb-fa163e038ef8
 spec:
   csr: <base64-encoded-csr>
@@ -126,11 +122,12 @@ spec:
 status:
   id: "18"
   state: ready
+```
 
 
 ## Installation
 
-This controller is created using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder). Automatically generated Makefile contains targets needed for build and installation. 
+This controller is implemented using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder). Automatically generated Makefile contains targets needed for build and installation. 
 Generated CRD manifests are stored in `config/crd`. RBAC roles and bindings can be found in config/rbac. There's also a Make target to build controller's Docker image and
 store it in local docker repo (Docker must be installed).
 
