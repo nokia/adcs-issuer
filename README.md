@@ -150,6 +150,6 @@ More then one directive can be used at a time. e.g. to simulate rejecting the ce
 
 ## Open issues
  
-* [Full X509 Distinguished Name support](https://github.com/jetstack/cert-manager/issues/2288)
-* [Problem with automatic retry of failed requests](https://github.com/jetstack/cert-manager/issues/2289)
+* Cert-manger limits the identity of the requestor to Organization and CommonName. Full X509 Distinguished Name support is needed. See: [Full X509 Distinguished Name support](https://github.com/jetstack/cert-manager/issues/2288)
+* When request is rejected by ADCS because of invalid data then there's a problem to indicate in CertificateReuqest that it should not be re-tried. See: [Problem with automatic retry of failed requests](https://github.com/jetstack/cert-manager/issues/2289)
 
