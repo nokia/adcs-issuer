@@ -68,7 +68,7 @@ func (r *AdcsRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
-	cert, err := issuer.Issue(ctx, ar)
+	cert, caCert, err := issuer.Issue(ctx, ar)
 	if err != nil {
 		// This is a local error.
 		// We don't change the request status and just put it back on the queue
@@ -87,6 +87,7 @@ func (r *AdcsRequestReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{Requeue: true, RequeueAfter: issuer.StatusCheckInterval}, nil
 	case api.Ready:
 		cr.Status.Certificate = cert
+		cr.Status.CA = caCert
 		r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionTrue, cmapi.CertificateRequestReasonIssued, "ADCS request successfull")
 	case api.Rejected:
 		// This is a little hack for strange cert-manager behavior in case of failed request. Cert-manager automatically

@@ -90,6 +90,7 @@ func (f *IssuerFactory) getAdcsIssuer(ctx context.Context, key client.ObjectKey)
 // Get ClusterAdcsIssuer object from K8s and create Issuer
 func (f *IssuerFactory) getClusterAdcsIssuer(ctx context.Context, key client.ObjectKey) (*Issuer, error) {
 	log := f.Log.WithValues("ClusterAdcsIssuer", key)
+	key.Namespace = ""
 
 	issuer := new(api.ClusterAdcsIssuer)
 	if err := f.Client.Get(ctx, key, issuer); err != nil {

@@ -25,7 +25,11 @@ type Issuer struct {
 	StatusCheckInterval time.Duration
 }
 
-func (i *Issuer) Issue(ctx context.Context, ar *api.AdcsRequest) ([]byte, error) {
+// Go to ADCS for a certificate. If current status is 'Pending' then
+// check for existing request. Otherwise ask for new.
+// The current status is set in the passed request.
+// If status is 'Ready' the returns include certificate and CA cert respectively.
+func (i *Issuer) Issue(ctx context.Context, ar *api.AdcsRequest) ([]byte, []byte, error) {
 	var adcsResponseStatus adcs.AdcsResponseStatus
 	var desc string
 	var id string
@@ -36,12 +40,12 @@ func (i *Issuer) Issue(ctx context.Context, ar *api.AdcsRequest) ([]byte, error)
 		if ar.Status.State == api.Pending {
 			// Check the status of the reqeust on the ADCS
 			if ar.Status.Id == "" {
-				return nil, fmt.Errorf("ADCS ID not set.")
+				return nil, nil, fmt.Errorf("ADCS ID not set.")
 			}
 			adcsResponseStatus, desc, id, err = i.certServ.GetExistingCertificate(ar.Status.Id)
 		} else {
 			// Nothing to do
-			return nil, nil
+			return nil, nil, nil
 		}
 	} else {
 		// New request
@@ -49,7 +53,7 @@ func (i *Issuer) Issue(ctx context.Context, ar *api.AdcsRequest) ([]byte, error)
 	}
 	if err != nil {
 		// This is a local error
-		return nil, err
+		return nil, nil, err
 	}
 
 	var cert []byte
@@ -77,6 +81,11 @@ func (i *Issuer) Issue(ctx context.Context, ar *api.AdcsRequest) ([]byte, error)
 		ar.Status.Reason = desc
 	}
 
-	return cert, nil
+	ca, err := i.certServ.GetCaCertificateChain()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return cert, []byte(ca), nil
 
 }
