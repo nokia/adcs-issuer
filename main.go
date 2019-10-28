@@ -46,9 +46,11 @@ func init() {
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
+	var clusterResourceNamespace string
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&clusterResourceNamespace, "cluster-resource-namespace", "kube-system", "Namespace where cluster-level resources are stored.")
 	flag.Parse()
 
 	ctrl.SetLogger(zap.Logger(true))
@@ -78,8 +80,9 @@ func main() {
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("AdcsRequest"),
 		IssuerFactory: issuers.IssuerFactory{
-			Client: mgr.GetClient(),
-			Log:    ctrl.Log.WithName("factories").WithName("AdcsIssuer"),
+			Client:                   mgr.GetClient(),
+			Log:                      ctrl.Log.WithName("factories").WithName("AdcsIssuer"),
+			ClusterResourceNamespace: clusterResourceNamespace,
 		},
 		Recorder:                     mgr.GetEventRecorderFor("adcs-requests-controller"),
 		CertificateRequestController: certificateRequestReconciler,

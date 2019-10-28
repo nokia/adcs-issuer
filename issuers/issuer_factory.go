@@ -24,7 +24,8 @@ const (
 
 type IssuerFactory struct {
 	client.Client
-	Log logr.Logger
+	Log                      logr.Logger
+	ClusterResourceNamespace string
 }
 
 func (f *IssuerFactory) GetIssuer(ctx context.Context, ref cmmeta.ObjectReference, namespace string) (*Issuer, error) {
@@ -96,7 +97,7 @@ func (f *IssuerFactory) getClusterAdcsIssuer(ctx context.Context, key client.Obj
 	}
 	// TODO: add checking issuer status
 
-	username, password, err := f.getUserPassword(ctx, issuer.Spec.CredentialsRef.Name, issuer.Namespace)
+	username, password, err := f.getUserPassword(ctx, issuer.Spec.CredentialsRef.Name, f.ClusterResourceNamespace)
 	if err != nil {
 		return nil, err
 	}

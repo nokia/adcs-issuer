@@ -69,7 +69,7 @@ func generateServerCertificate(cs *certserv.Certserv, ips *string, dns *string) 
 		for _, ipString := range strings.Split(*ips, ",") {
 			ip := net.ParseIP(ipString)
 			if ip == nil {
-				fmt.Sprintf("Error parsing ip=%s\n", ipString)
+				fmt.Printf("Error parsing ip=%s\n", ipString)
 				continue
 			}
 			ipAddresses = append(ipAddresses, ip)

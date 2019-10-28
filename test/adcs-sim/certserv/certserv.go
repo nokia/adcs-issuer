@@ -104,7 +104,7 @@ func (c *Certserv) HandleCertnewCer(w http.ResponseWriter, req *http.Request) {
 		return
 	} else if !os.IsNotExist(err) {
 		// Error other than 'file doesn't exists' occured
-		msg := fmt.Sprintf("Cannot open certificate %d.", reqId[0])
+		msg := fmt.Sprintf("Cannot open certificate %s.", reqId[0])
 		res := Resp{msg, "Error"}
 		tmpl.Execute(w, res)
 		return
@@ -112,7 +112,7 @@ func (c *Certserv) HandleCertnewCer(w http.ResponseWriter, req *http.Request) {
 	// Certificate doesn't exist. Let's process the CSR
 	file, err = ioutil.ReadFile(csrFileName)
 	if err != nil {
-		msg := fmt.Sprintf("Cannot open CSR %d.", reqId[0])
+		msg := fmt.Sprintf("Cannot open CSR %s.", reqId[0])
 		res := Resp{msg, "Error"}
 		tmpl.Execute(w, res)
 		return
@@ -120,7 +120,7 @@ func (c *Certserv) HandleCertnewCer(w http.ResponseWriter, req *http.Request) {
 	fileInfo, _ := os.Lstat(csrFileName)
 	csr, err := decodeCertRequest(string(file))
 	if err != nil {
-		msg := fmt.Sprintf("Cannot decode CSR %d.", reqId[0])
+		msg := fmt.Sprintf("Cannot decode CSR %s.", reqId[0])
 		res := Resp{msg, "Error"}
 		tmpl.Execute(w, res)
 		return
