@@ -98,6 +98,12 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "AdcsIssuer")
 		os.Exit(1)
 	}
+
+	if err = (&adcsv1.AdcsIssuer{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "AdcsIssuer")
+		os.Exit(1)
+	}
+
 	if err = (&controllers.ClusterAdcsIssuerReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("ClusterAdcsIssuer"),
