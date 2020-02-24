@@ -132,8 +132,8 @@ metadata:
   name: test-ingress
     annotations:
         cert-manager.io/issuer: "adcs-issuer" #use specific name of issuer
-            cert-manager.io/issuer-kind: "AdcsIssuer" #or AdcsClusterIssuer
-                cert-manager.io/issuer-group: "adcs.certmanager.csf.nokia.com"
+        cert-manager.io/issuer-kind: "AdcsIssuer" #or AdcsClusterIssuer
+        cert-manager.io/issuer-group: "adcs.certmanager.csf.nokia.com"
 ```
 in addition to
 ```
