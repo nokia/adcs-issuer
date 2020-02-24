@@ -135,6 +135,14 @@ metadata:
             cert-manager.io/issuer-kind: "AdcsIssuer" #or AdcsClusterIssuer
                 cert-manager.io/issuer-group: "adcs.certmanager.csf.nokia.com"
 ```
+in addition to
+```
+spec:
+  tls:
+    - hosts:
+        - test-host.com
+            secretName: ingress-secret # secret cert-manager stores certificate in
+```
 
 ## Installation
 
