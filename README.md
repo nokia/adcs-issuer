@@ -124,6 +124,17 @@ status:
   state: ready
 ```
 
+#### Auto-request certificate from ingress
+Add the following to an `Ingress` for cert-manager to auto-generate a
+`Certificate` using `Ingress` information with ingress-shim
+```
+metadata:
+  name: test-ingress
+    annotations:
+        cert-manager.io/issuer: "adcs-issuer" #use specific name of issuer
+            cert-manager.io/issuer-kind: "AdcsIssuer" #or AdcsClusterIssuer
+                cert-manager.io/issuer-group: "adcs.certmanager.csf.nokia.com"
+```
 
 ## Installation
 
