@@ -159,3 +159,8 @@ More then one directive can be used at a time. e.g. to simulate rejecting the ce
 * Helm chart
 * ...
 
+
+
+## License
+
+This project is licensed under the BSD-3-Clause license - see the [LICENSE](https://github.com/nokia/adcs-issuer/blob/master/LICENSE).
