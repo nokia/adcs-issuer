@@ -17,11 +17,13 @@ package main
 
 import (
 	"flag"
+	"net/http"
 	"os"
 
 	certmanager "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	adcsv1 "github.com/nokia/adcs-issuer/api/v1"
 	"github.com/nokia/adcs-issuer/controllers"
+	"github.com/nokia/adcs-issuer/healthcheck"
 	"github.com/nokia/adcs-issuer/issuers"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -111,6 +113,10 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "ClusterAdcsIssuer")
 		os.Exit(1)
 	}
+
+	// Register healthcheck
+	http.HandleFunc("/healthcheck", healthcheck.ServeHealthCheck)
+
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")
