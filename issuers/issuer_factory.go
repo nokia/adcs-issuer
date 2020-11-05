@@ -13,8 +13,8 @@ import (
 
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 
-	"github.com/chojnack/adcs-issuer/adcs"
-	api "github.com/chojnack/adcs-issuer/api/v1"
+	"github.com/nokia/adcs-issuer/adcs"
+	api "github.com/nokia/adcs-issuer/api/v1"
 )
 
 const (

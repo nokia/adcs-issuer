@@ -1,4 +1,4 @@
-module github.com/chojnack/adcs-issuer
+module github.com/nokia/adcs-issuer
 
 go 1.12
 

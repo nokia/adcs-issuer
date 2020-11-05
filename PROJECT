@@ -1,6 +1,6 @@
 version: "2"
 domain: certmanager.csf.nokia.com
-repo: github.com/chojnack/adcs-issuer
+repo: github.com/nokia/adcs-issuer
 resources:
 - group: adcs
   version: v1

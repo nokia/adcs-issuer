@@ -30,7 +30,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/chojnack/adcs-issuer/test/adcs-sim/certserv"
+	"github.com/nokia/adcs-issuer/test/adcs-sim/certserv"
 )
 
 var (
