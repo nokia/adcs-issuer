@@ -24,6 +24,24 @@ webhooks:
     - UPDATE
     resources:
     - adcsissuer
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-batch-certmanager-csf-nokia-com-v1-clusteradcsissuer
+  failurePolicy: Fail
+  name: mclusteradcsissuer.kb.io
+  rules:
+  - apiGroups:
+    - batch.certmanager.csf.nokia.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - clusteradcsissuers
 
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -50,3 +68,21 @@ webhooks:
     - UPDATE
     resources:
     - adcsissuer
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-batch-certmanager-csf-nokia-com-v1-clusteradcsissuer
+  failurePolicy: Fail
+  name: vclusteradcsissuer.kb.io
+  rules:
+  - apiGroups:
+    - batch.certmanager.csf.nokia.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - clusteradcsissuers
