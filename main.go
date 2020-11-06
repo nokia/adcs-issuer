@@ -17,8 +17,8 @@ package main
 
 import (
 	"flag"
-	"net/http"
 	"os"
+	"strconv"
 
 	certmanager "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	adcsv1 "github.com/nokia/adcs-issuer/api/v1"
@@ -31,6 +31,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	// +kubebuilder:scaffold:imports
+)
+
+const (
+	defaultPort int = 9443
 )
 
 var (
@@ -47,9 +51,18 @@ func init() {
 
 func main() {
 	var metricsAddr string
+	var healthcheckAddr string
+	var webhooksPort string
 	var enableLeaderElection bool
 	var clusterResourceNamespace string
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&healthcheckAddr, "healthcheck-addr", ":8081", "The address the healthcheck endpoints binds to.")
+	flag.StringVar(&webhooksPort, "webhooks-port", strconv.Itoa(defaultPort), "Port for webhooks requests.")
+	port, err := strconv.Atoi(webhooksPort)
+	if err != nil {
+		setupLog.Error(err, "invalid webhooks port. Using default.")
+		port = defaultPort
+	}
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&clusterResourceNamespace, "cluster-resource-namespace", "kube-system", "Namespace where cluster-level resources are stored.")
@@ -58,16 +71,19 @@ func main() {
 	ctrl.SetLogger(zap.Logger(true))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		LeaderElection:     enableLeaderElection,
-		Port:               9443,
+		Scheme:                 scheme,
+		MetricsBindAddress:     metricsAddr,
+		HealthProbeBindAddress: healthcheckAddr,
+		LeaderElection:         enableLeaderElection,
+		Port:                   port,
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
+	mgr.AddHealthzCheck("healthz", healthcheck.HealthCheck)
+	mgr.AddReadyzCheck("readyz", healthcheck.HealthCheck)
 	certificateRequestReconciler := &controllers.CertificateRequestReconciler{
 		Client:   mgr.GetClient(),
 		Log:      ctrl.Log.WithName("controllers").WithName("CertificateRequest"),
@@ -113,9 +129,6 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "ClusterAdcsIssuer")
 		os.Exit(1)
 	}
-
-	// Register healthcheck
-	http.HandleFunc("/healthcheck", healthcheck.ServeHealthCheck)
 
 	// +kubebuilder:scaffold:builder
 

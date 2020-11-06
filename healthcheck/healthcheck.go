@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func ServeHealthCheck(w http.ResponseWriter, r *http.Request) {
+func HealthCheck(r *http.Request) error {
 	glog.V(1).Info("Healthcheck passed")
-	w.WriteHeader(200)
+	return nil
 }
