@@ -150,6 +150,15 @@ This controller is implemented using [kubebuilder](https://github.com/kubernetes
 Generated CRD manifests are stored in `config/crd`. RBAC roles and bindings can be found in config/rbac. There's also a Make target to build controller's Docker image and
 store it in local docker repo (Docker must be installed).
 
+
+### Disable Approval Check
+
+The ADCS Issuer will wait for CertificateRequests to have an [approved condition
+set](https://cert-manager.io/docs/concepts/certificaterequest/#approval) before
+signing. If using an older version of cert-manager (pre v1.3), you can disable
+this check by supplying the command line flag `-enable-approved-check=false` to
+the Issuer Deployment.
+
 ## Testing considerations
 
 ### ADCS Simulator
