@@ -30,6 +30,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/klog"
+	"k8s.io/utils/clock"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	// +kubebuilder:scaffold:imports
@@ -63,9 +64,13 @@ func main() {
 	var webhooksPort string
 	var enableLeaderElection bool
 	var clusterResourceNamespace string
+	var disableApprovedCheck bool
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&healthcheckAddr, "healthcheck-addr", ":8081", "The address the healthcheck endpoints binds to.")
 	flag.StringVar(&webhooksPort, "webhooks-port", strconv.Itoa(defaultWebhooksPort), "Port for webhooks requests.")
+	flag.BoolVar(&disableApprovedCheck, "disable-approved-check", false,
+		"Disables waiting for CertificateRequests to have an approved condition before signing.")
+
 	port, err := strconv.Atoi(webhooksPort)
 	if err != nil {
 		setupLog.Error(err, "invalid webhooks port. Using default.")
@@ -74,9 +79,14 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&clusterResourceNamespace, "cluster-resource-namespace", "kube-system", "Namespace where cluster-level resources are stored.")
+
+	// Options for configuring logging
+	opts := zap.Options{}
+	opts.BindFlags(flag.CommandLine)
+
 	flag.Parse()
 
-	ctrl.SetLogger(zap.Logger(false))
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -96,6 +106,9 @@ func main() {
 		Client:   mgr.GetClient(),
 		Log:      ctrl.Log.WithName("controllers").WithName("CertificateRequest"),
 		Recorder: mgr.GetEventRecorderFor("adcs-certificaterequests-controller"),
+
+		Clock:                  clock.RealClock{},
+		CheckApprovedCondition: !disableApprovedCheck,
 	}
 	if err = (certificateRequestReconciler).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CertificateRequest")

@@ -34,8 +34,7 @@ type AdcsIssuerReconciler struct {
 // +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=adcsissuers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=adcs.certmanager.csf.nokia.com,resources=adcsissuers/status,verbs=get;update;patch
 
-func (r *AdcsIssuerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *AdcsIssuerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("adcsissuer", req.NamespacedName)
 
 	// your logic here
