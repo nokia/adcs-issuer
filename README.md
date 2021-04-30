@@ -17,8 +17,9 @@ ADCS Issuer has been tested with cert-manager v.0.11.0 and currently supports Ce
 ## Configuration and usage
 
 ### Issuers
-The ADCS service data can configured in `AdcsIssuer` or `ClusterAdcsIssuer` CRD objects e.g.:
+The ADCS service data can be configured in `AdcsIssuer` or `ClusterAdcsIssuer` CRD objects e.g.:
 ```
+apiVersion: adcs.certmanager.csf.nokia.com/v1
 kind: AdcsIssuer
 metadata:
   name: test-adcs
@@ -162,7 +163,7 @@ the Issuer Deployment.
 ## Testing considerations
 
 ### ADCS Simulator
-The test/adcs-sim directory contains a simple ADCS simulator that can be used for basic tests (run `make sim-install` to build it and install in /usr/local directory tree). The simulator can be started on the host and work ad ADCS server that will sign certificates using provided self-signed certificate and key (`root.pem` and `root.key` files). If needed the certificate can be replaced with any other available.
+The test/adcs-sim directory contains a simple ADCS simulator that can be used for basic tests (run `make sim-install` to build it and install in /usr/local directory tree). The simulator can be started on the host and work as ADCS server that will sign certificates using provided self-signed certificate and key (`root.pem` and `root.key` files). If needed the certificate can be replaced with any other available.
 
 The simulator accepts directives to control its behavior. The directives are set as additional domain names in the certificate request:
 * **delay.<time>.sim**  where <time> is e.g. 10m, 15h etc - the certificate will be issued after the specified time
