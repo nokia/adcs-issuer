@@ -53,6 +53,7 @@ type: Opaque
 ```
 If cluster level issuer configuration is needed then ClusterAdcsUssuer can be defined like this:
 ```
+apiVersion: adcs.certmanager.csf.nokia.com/v1
 kind: ClusterAdcsIssuer
 metadata:
   name: test-adcs
