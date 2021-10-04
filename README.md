@@ -1,6 +1,6 @@
 # ADCS Issuer
 
-
+Sorry, but this project is no longer maintained. We do not address any issues or pr-s opened.
 
 ADCS Issuer is a [cert-manager's](https://github.com/jetstack/cert-manager) CertificateRequest controller that uses MS Active Directory Certificate Service to sign certificates 
 (see [this design document](https://github.com/jetstack/cert-manager/blob/master/design/20190708.certificate-request-crd.md) for details on CertificateRequest CRD). 
